@@ -35,7 +35,7 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    pass
+    return jsonify(data)
 
 ######################################################################
 # GET A PICTURE
@@ -44,15 +44,28 @@ def get_pictures():
 
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    pass
-
+    for picture in data:
+        if picture["id"] == id:
+            return jsonify(picture)
+    return jsonify({"error": "Picture not found"}), 404
+    
 
 ######################################################################
 # CREATE A PICTURE
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    pass
+    newPicture = request.json
+
+    idExist = False
+    for picture in data:
+        if picture["id"] == newPicture["id"]:
+            idExist = True
+            return ({"Message":f"picture with id {picture['id']} already present"}, 302)
+
+    if not idExist:
+        data.append(newPicture)
+        return (newPicture, 201)
 
 ######################################################################
 # UPDATE A PICTURE
@@ -61,11 +74,27 @@ def create_picture():
 
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    pass
+    pictureData = request.json
+
+    picExists = False
+    for idx, picture in enumerate(data):
+        if picture["id"] == id:
+            data[idx] = pictureData # update with the incoming request
+            picExists = True
+            return (picture, 201)
+            
+    if picExists is False:
+        return (jsonify(message="picture not found"), 404)
+
 
 ######################################################################
 # DELETE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    pass
+    for picture in data:
+        if picture["id"] == id:
+            data.remove(picture)
+            return ("", 204)
+
+    return (jsonify(message="picture not found"), 404)
